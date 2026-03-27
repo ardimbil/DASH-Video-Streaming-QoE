@@ -1,0 +1,140 @@
+# DASH Streaming Project 
+
+# --------------------------------------------
+
+# 1. FFmpeg Installation
+
+# --------------------------------------------
+
+sudo apt update
+sudo apt install ffmpeg -y
+
+# --------------------------------------------
+
+# 2. Video Transcoding (Multiple Bitrates)
+
+# --------------------------------------------
+
+# 1.5 Mbps
+
+ffmpeg -i input.mp4 -b:v 1500k -bufsize 1500k output_1.5Mbps.mp4
+
+# 2 Mbps
+
+ffmpeg -i input.mp4 -b:v 2000k -bufsize 2000k output_2Mbps.mp4
+
+# 4 Mbps
+
+ffmpeg -i input.mp4 -b:v 4000k -bufsize 4000k output_4Mbps.mp4
+
+# --------------------------------------------
+
+# 3. DASH Manifest Generation
+
+# --------------------------------------------
+
+ffmpeg -i input.mp4 
+-map 0 -b:v:0 1500k -b:v:1 2000k -b:v:2 4000k 
+-use_template 1 -use_timeline 1 
+-f dash manifest.mpd
+
+# --------------------------------------------
+
+# 4. Web Server Setup (Apache)
+
+# --------------------------------------------
+
+sudo apt install apache2 -y
+sudo systemctl start apache2
+sudo systemctl enable apache2
+
+# Copy DASH files to web directory
+
+sudo cp -r ~/Dashproject/videos/* /var/www/html/
+
+# --------------------------------------------
+
+# 5. iPerf Traffic Generation
+
+# --------------------------------------------
+
+# Run on server
+
+iperf3 -s
+
+# Run on client (1 Mbps TCP connection)
+
+iperf3 -c <server-ip> -t 20 -b 1M
+
+# --------------------------------------------
+
+# 6. Traffic Control (tc) Commands
+
+# --------------------------------------------
+
+# Clear existing rules (important before applying new ones)
+
+sudo tc qdisc del dev enp0s8 root
+sudo tc qdisc del dev enp0s8 ingress
+
+# --------------------------------------------
+
+# 6.1 Token Bucket Filter (TBF)
+
+# --------------------------------------------
+
+sudo tc qdisc add dev enp0s8 root tbf rate 2.5mbit burst 20k latency 50ms
+
+# --------------------------------------------
+
+# 6.2 Hierarchical Token Bucket (HTB)
+
+# --------------------------------------------
+
+sudo tc qdisc add dev enp0s8 root handle 1: htb default 10
+sudo tc class add dev enp0s8 parent 1: classid 1:10 htb rate 2.5mbit ceil 5mbit burst 20k
+
+# --------------------------------------------
+
+# 6.3 Traffic Policing (Ingress)
+
+# --------------------------------------------
+
+sudo tc qdisc add dev enp0s8 handle ffff: ingress
+sudo tc filter add dev enp0s8 parent ffff: protocol ip u32 
+match u32 0 0 police rate 3.5mbit drop
+
+# --------------------------------------------
+
+# 7. Verification Commands
+
+# --------------------------------------------
+
+# Check qdisc status
+
+tc -s qdisc show dev enp0s8
+
+# Check classes
+
+tc -s class show dev enp0s8
+
+# Check filters
+
+tc -s filter show dev enp0s8
+
+# --------------------------------------------
+
+# 8. Cleanup Commands
+
+# --------------------------------------------
+
+# Remove all traffic control rules
+
+sudo tc qdisc del dev enp0s8 root
+sudo tc qdisc del dev enp0s8 ingress
+
+# --------------------------------------------
+
+# End of Commands
+
+# --------------------------------------------
