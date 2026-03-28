@@ -1,17 +1,17 @@
 DASH Video Streaming and QoE Evaluation Project
 
-This project demonstrates the implementation of Dynamic Adaptive Streaming over HTTP (DASH) using a client-server architecture based on Linux virtual machines. The objective is to evaluate the Quality of Experience (QoE) under different network conditions using Mean Opinion Score (MOS).
+TThis project demonstrates an end-to-end implementation of Dynamic Adaptive Streaming over HTTP (DASH) using a client-server architecture with Linux virtual machines. The goal was to see how different network conditions affect video quality and to evaluate the viewing experience using Mean Opinion Score (MOS).
 
 ---
 
-🎯 Objectives
+🎯 Objectives/ What This Project Does
 
-* Implement DASH-based video streaming
-* Encode videos at multiple bitrates (1.5 Mbps, 2 Mbps, 4 Mbps)
-* Generate DASH manifest using FFmpeg
-* Stream video via web server
-* Simulate network conditions using Linux Traffic Control
-* Evaluate QoE using MOS
+* Transcodes HD videos into multiple bitrates (1.5 Mbps, 2 Mbps, 4 Mbps)
+* Generates DASH manifests and segments using FFmpeg
+* Hosts the streams on an Apache web server
+* Plays back the video using a DASH-compatible player
+* Simulates network impairments with Linux Traffic Control (TBF, HTB, policing)
+* Measures Quality of Experience (QoE) using MOS
 
 ---
 
@@ -140,4 +140,4 @@ Included in the report (IEEE format)
 
 ## 👨‍💻 Author
 
-Student Project – DASH Streaming Coursework
+Abdul-Rahman Dimbil 
